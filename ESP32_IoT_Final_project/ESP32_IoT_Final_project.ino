@@ -23,7 +23,7 @@ const char* mqtt_username = "sanpetch";
 const char* mqtt_password = "siriwuthinon";
 const int mqtt_port = 1883;
 
-// char msg[100];
+char msg[100];
 
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
@@ -324,28 +324,34 @@ void TaskSendData(void *pvParameters) {
         read_HTS221Buffer.newData(buf2);
     }
 
-    // Create a StaticJsonDocument with a sufficient capacity for your JSON data
-        StaticJsonDocument<256> doc;
+    String data = "{\"temp_BMP280\":" + String(read_BMP280Buffer.Data1()) + "}";
+    Serial.println(data);
+    data.toCharArray(msg, (data.length() + 1));
+    mqtt_client.publish("@msg/data", msg); 
+
+    // // Create a StaticJsonDocument with a sufficient capacity for your JSON data
+    //     StaticJsonDocument<256> doc;
         
-        // Add the sensor data to the JSON document
-        doc["temp_BMP280"] = read_BMP280Buffer.Data1();
-        // doc["temp_HTS221"] = read_HTS221Buffer.Data1();
-        // doc["humid_HTS221"] = read_HTS221Buffer.Data2();
-        // doc["pressure_BMP280"] = read_BMP280Buffer.Data2();
+    //     // Add the sensor data to the JSON document
+    //     doc["temp_BMP280"] = read_BMP280Buffer.Data1();
+    //     doc["temp_HTS221"] = read_HTS221Buffer.Data1();
+    //     doc["humid_HTS221"] = read_HTS221Buffer.Data2();
+    //     doc["pressure_BMP280"] = read_BMP280Buffer.Data2();
 
-        // Serialize the JSON document to a string
-        char jsonStr[256];
-        size_t jsonStrSize = serializeJson(doc, jsonStr, sizeof(jsonStr));
+    //     // Serialize the JSON document to a string
+    //     char jsonStr[256];
+    //     size_t jsonStrSize = serializeJson(doc, jsonStr, sizeof(jsonStr));
 
-        // Publish the JSON string to the MQTT topic
-        mqtt_client.publish(mqtt_topic, jsonStr);
+    //     // Publish the JSON string to the MQTT topic
+    //     mqtt_client.publish(mqtt_topic, jsonStr);
 
-        // Print the JSON data to the Serial console for debugging
-        lock->lockSerial();
-        Serial.println(jsonStr);
-        lock->unlockSerial();
-
-        // Delay for 60 seconds before the next iteration
+    //     // Print the JSON data to the Serial console for debugging
+    //     lock->lockSerial();
+    //     Serial.println(jsonStr);
+    //     lock->unlockSerial();
+     // Convert the float value to a String
+   
+        // Delay for 5 seconds before the next iteration
         vTaskDelay(5000L);
     }
     }
