@@ -226,7 +226,7 @@ void TaskBMP280(void *pvParameters) {
     // Serial.printf("Approx altitude from BMP280: %3.2f m.\n\n", altitude);
     // unlock Serial Port
       lock->unlockSerial();
-    vTaskDelay(2000L);
+    vTaskDelay(5000L);
   }
   // end of the task
 }
@@ -298,7 +298,7 @@ void TaskReadHTS221(void *pvParameters) {
       // send the new Data to the Q, if the Q is full, wait for 100 ticks.
       while (xQueueSend(HTS221_PreQ, &Data, (TickType_t)100) != pdTRUE);
       // wait until the preprocessor do something about the data
-    vTaskDelay(2000L);
+    vTaskDelay(5000L);
   }
   // end of the task
 }
@@ -364,7 +364,7 @@ void TaskSendData(void *pvParameters) {
         lock->unlockSerial();
 
         // Delay for 60 seconds before the next iteration
-        vTaskDelay(2000L);
+        vTaskDelay(5000L);
     }
     }
     
