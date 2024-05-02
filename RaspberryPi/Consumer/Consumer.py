@@ -72,7 +72,7 @@ def write_to_influxdb(data):
         .field("temp_BMP280", data["temp_BMP280"])\
         .field("temp_HTS221", data["temp_HTS221"])\
         .field("humid_HTS221", data["humid_HTS221"])\
-        .field("pressure_BMP280", data["pressure_BMP280"])\
+        .field("pressure_BMP280", data["pressure_BMP280"])
 
     write_api.write(BUCKET, os.environ.get('INFLUXDB_ORG'), point)
 
