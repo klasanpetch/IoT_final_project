@@ -69,8 +69,8 @@ def write_to_influxdb(data):
     # humid_hts221 = int(data["humid_HTS221"])
     # pressure_bmp280 = int(data["pressure_BMP280"])
     # format data
-    point = Point("g8_sensor_data")\
-        .field("temp_BMP280", temp_BMP280)\
+    point = Point("g8_final_sensor_data")\
+        .field("temp_BMP280", temp_BMP280)
         # .field("temp_HTS221", temp_HTS221)\
         # .field("humid_HTS221", humid_hts221)\
         # .field("pressure_BMP280", pressure_bmp280)
