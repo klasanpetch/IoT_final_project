@@ -65,15 +65,15 @@ def post_to_predict(data):
 def write_to_influxdb(data):
     # Convert g8_sensor_data to an integer if necessary
     temp_BMP280 =  int(data["temp_BMP280"])
-    temp_HTS221 = int(data["temp_HTS221"])
-    humid_hts221 = int(data["humid_HTS221"])
-    pressure_bmp280 = int(data["pressure_BMP280"])
+    # temp_HTS221 = int(data["temp_HTS221"])
+    # humid_hts221 = int(data["humid_HTS221"])
+    # pressure_bmp280 = int(data["pressure_BMP280"])
     # format data
     point = Point("g8_sensor_data")\
         .field("temp_BMP280", temp_BMP280)\
-        .field("temp_HTS221", temp_HTS221)\
-        .field("humid_HTS221", humid_hts221)\
-        .field("pressure_BMP280", pressure_bmp280)
+        # .field("temp_HTS221", temp_HTS221)\
+        # .field("humid_HTS221", humid_hts221)\
+        # .field("pressure_BMP280", pressure_bmp280)
 
     write_api.write(BUCKET, os.environ.get('INFLUXDB_ORG'), point)
 

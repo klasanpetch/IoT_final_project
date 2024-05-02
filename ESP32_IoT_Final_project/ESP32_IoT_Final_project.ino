@@ -316,38 +316,19 @@ void TaskSendData(void *pvParameters) {
     // read the shared Q, put the data to buf. if Q is empty, wait for 10 ticks
     if (xQueueReceive(BMP280_PreQ, buf1, (TickType_t)10)){
         read_BMP280Buffer.newData(buf1);
-        // lock->lockSerial();
-        // Serial.printf("read BMP280 Buffer1 = ");
-        // Serial.println(read_BMP280Buffer.Data1());
-        // Serial.printf("read BMP280 Buffer2 = ");
-        // Serial.println(read_BMP280Buffer.Data2());
-        // lock->unlockSerial();
     }
     if (xQueueReceive(HTS221_PreQ, buf2, (TickType_t)10)){
         read_HTS221Buffer.newData(buf2);
-        // lock->lockSerial();
-        // Serial.printf("read HTS221 Buffer1 = ");
-        // Serial.println(read_HTS221Buffer.Data1());
-        // Serial.printf("read HTS221Buffer2 = ");
-        // Serial.println(read_HTS221Buffer.Data2());
-        // lock->unlockSerial();
     }
-    // String data = "{\"data\": {\"temp_BMP280\":" + String(read_BMP280Buffer.Data1()) + ", \"temp_HTS221\":" + String(read_HTS221Buffer.Data1()) + ",\"humid_HTS221\":" + String(read_HTS221Buffer.Data2()) + ",\"pressure_BMP280\":" +  String(read_BMP280Buffer.Data2()) + "}}";
-    // String data = "{\"temp_BMP280\":" + String(read_BMP280Buffer.Data1()) + ", \"temp_HTS221\":" + String(read_HTS221Buffer.Data1()) + ",\"humid_HTS221\":" + String(read_HTS221Buffer.Data2()) + ",\"pressure_BMP280\":" +  String(read_BMP280Buffer.Data2()) + "}";
 
-    // Serial.println(data);
-    // data.toCharArray(msg, (data.length() + 1));
-    // mqtt_client.publish("@msg/data", msg); 
-    // Serial.print("check message = ");
-    // Serial.println(msg);
     // Create a StaticJsonDocument with a sufficient capacity for your JSON data
         StaticJsonDocument<256> doc;
         
         // Add the sensor data to the JSON document
         doc["temp_BMP280"] = read_BMP280Buffer.Data1();
-        doc["temp_HTS221"] = read_HTS221Buffer.Data1();
-        doc["humid_HTS221"] = read_HTS221Buffer.Data2();
-        doc["pressure_BMP280"] = read_BMP280Buffer.Data2();
+        // doc["temp_HTS221"] = read_HTS221Buffer.Data1();
+        // doc["humid_HTS221"] = read_HTS221Buffer.Data2();
+        // doc["pressure_BMP280"] = read_BMP280Buffer.Data2();
 
         // Serialize the JSON document to a string
         char jsonStr[256];
