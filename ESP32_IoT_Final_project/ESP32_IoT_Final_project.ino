@@ -154,7 +154,7 @@ void connectToWiFi() {
 
 void connectToMQTT() {
     while (!mqtt_client.connected()) {
-        String client_id = "esp32-client-" + String(WiFi.macAddress());
+        String client_id = "esp32-client";
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
@@ -226,7 +226,7 @@ void TaskBMP280(void *pvParameters) {
     // Serial.printf("Approx altitude from BMP280: %3.2f m.\n\n", altitude);
     // unlock Serial Port
       lock->unlockSerial();
-    vTaskDelay(60000L);
+    vTaskDelay(2000L);
   }
   // end of the task
 }
@@ -298,7 +298,7 @@ void TaskReadHTS221(void *pvParameters) {
       // send the new Data to the Q, if the Q is full, wait for 100 ticks.
       while (xQueueSend(HTS221_PreQ, &Data, (TickType_t)100) != pdTRUE);
       // wait until the preprocessor do something about the data
-    vTaskDelay(60000L);
+    vTaskDelay(2000L);
   }
   // end of the task
 }
@@ -317,7 +317,7 @@ void TaskSendData(void *pvParameters) {
   for (;;) {
     // read the shared Q, put the data to buf. if Q is empty, wait for 10 ticks
     if (xQueueReceive(BMP280_PreQ, buf1, (TickType_t)10)){
-        // read_BMP280Buffer.newData(buf1);
+        read_BMP280Buffer.newData(buf1);
         // lock->lockSerial();
         // Serial.printf("read BMP280 Buffer1 = ");
         // Serial.println(read_BMP280Buffer.Data1());
@@ -326,7 +326,7 @@ void TaskSendData(void *pvParameters) {
         // lock->unlockSerial();
     }
     if (xQueueReceive(HTS221_PreQ, buf2, (TickType_t)10)){
-        // read_HTS221Buffer.newData(buf2);
+        read_HTS221Buffer.newData(buf2);
         // lock->lockSerial();
         // Serial.printf("read HTS221 Buffer1 = ");
         // Serial.println(read_HTS221Buffer.Data1());
@@ -364,9 +364,7 @@ void TaskSendData(void *pvParameters) {
         lock->unlockSerial();
 
         // Delay for 60 seconds before the next iteration
-        vTaskDelay(60000L);
+        vTaskDelay(2000L);
     }
-
-    vTaskDelay(60000L);
     }
     
