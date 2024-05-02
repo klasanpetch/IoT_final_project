@@ -34,7 +34,13 @@ MQTT_PUBLISH_TOPIC = "@msg/data"
 MQTT_CLIENT_ID = os.environ.get('MQTT_CLIENT_ID')
 print("connecting to MQTT Broker", MQTT_BROKER_URL)
 # Initialize the MQTT client with the client ID
-mqttc = mqtt.Client(client_id=MQTT_CLIENT_ID)
+# mqttc = mqtt.Client(client_id=MQTT_CLIENT_ID)
+
+# Initialize the MQTT client with client ID, protocol (MQTT 5.0), and Callback API Version 5
+mqttc = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=mqtt.MQTTv5, callback_api_version=mqtt.CallbackAPIVersion.V5)
+
+# Set the username and password for MQTT authentication
+mqttc.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
 # Set the username and password for MQTT authentication
 mqttc.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
