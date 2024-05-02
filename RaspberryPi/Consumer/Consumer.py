@@ -37,7 +37,7 @@ print("connecting to MQTT Broker", MQTT_BROKER_URL)
 # mqttc = mqtt.Client(client_id=MQTT_CLIENT_ID)
 
 # Initialize the MQTT client with client ID, protocol (MQTT 5.0), and Callback API Version 5
-mqttc = mqtt.Client(MQTT_CLIENT_ID)
+mqttc = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=mqtt.MQTTv311)
 
 # Set the username and password for MQTT authentication
 mqttc.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
@@ -52,8 +52,8 @@ def on_connect(client, userdata, flags, rc, properties):
     """ The callback for when the client connects to the broker."""
     print("Connected with result code "+str(rc))
  
-# Subscribe to a topic
-mqttc.subscribe(MQTT_PUBLISH_TOPIC)
+    # Subscribe to a topic
+    mqttc.subscribe(MQTT_PUBLISH_TOPIC)
  
 def on_message(client, userdata, msg):
     """ The callback for when a PUBLISH message is received from the server."""
