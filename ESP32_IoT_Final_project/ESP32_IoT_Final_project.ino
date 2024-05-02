@@ -8,7 +8,7 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_HTS221.h>    //IIC humidity sensor
 #include "Adafruit_SHT4x.h"  // New board has upgraged HTS221 to SHT4x
-
+#include <ArduinoJson.h>
 #define SDA_PIN 41
 #define SCL_PIN 40
 
@@ -19,11 +19,11 @@ const char* password = "0891117564";
 // MQTT Broker Setting
 const char* mqtt_broker = "192.168.1.48";
 const char *mqtt_topic = "@msg/data";
-const char* mqtt_username = "admin";
-const char* mqtt_password = "public";
+const char* mqtt_username = "sanpetch";
+const char* mqtt_password = "siriwuthinon";
 const int mqtt_port = 1883;
 
-char msg[100];
+// char msg[100];
 
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
@@ -317,39 +317,56 @@ void TaskSendData(void *pvParameters) {
   for (;;) {
     // read the shared Q, put the data to buf. if Q is empty, wait for 10 ticks
     if (xQueueReceive(BMP280_PreQ, buf1, (TickType_t)10)){
-        read_BMP280Buffer.newData(buf1);
-        lock->lockSerial();
-        Serial.printf("read BMP280 Buffer1 = ");
-        Serial.println(read_BMP280Buffer.Data1());
-        Serial.printf("read BMP280 Buffer2 = ");
-        Serial.println(read_BMP280Buffer.Data2());
-        lock->unlockSerial();
+        // read_BMP280Buffer.newData(buf1);
+        // lock->lockSerial();
+        // Serial.printf("read BMP280 Buffer1 = ");
+        // Serial.println(read_BMP280Buffer.Data1());
+        // Serial.printf("read BMP280 Buffer2 = ");
+        // Serial.println(read_BMP280Buffer.Data2());
+        // lock->unlockSerial();
     }
     if (xQueueReceive(HTS221_PreQ, buf2, (TickType_t)10)){
-        read_HTS221Buffer.newData(buf2);
-        lock->lockSerial();
-        Serial.printf("read HTS221 Buffer1 = ");
-        Serial.println(read_HTS221Buffer.Data1());
-        Serial.printf("read HTS221Buffer2 = ");
-        Serial.println(read_HTS221Buffer.Data2());
-        lock->unlockSerial();
+        // read_HTS221Buffer.newData(buf2);
+        // lock->lockSerial();
+        // Serial.printf("read HTS221 Buffer1 = ");
+        // Serial.println(read_HTS221Buffer.Data1());
+        // Serial.printf("read HTS221Buffer2 = ");
+        // Serial.println(read_HTS221Buffer.Data2());
+        // lock->unlockSerial();
     }
     // String data = "{\"data\": {\"temp_BMP280\":" + String(read_BMP280Buffer.Data1()) + ", \"temp_HTS221\":" + String(read_HTS221Buffer.Data1()) + ",\"humid_HTS221\":" + String(read_HTS221Buffer.Data2()) + ",\"pressure_BMP280\":" +  String(read_BMP280Buffer.Data2()) + "}}";
-    String data = "{\"temp_BMP280\":" + String(read_BMP280Buffer.Data1()) + ", \"temp_HTS221\":" + String(read_HTS221Buffer.Data1()) + ",\"humid_HTS221\":" + String(read_HTS221Buffer.Data2()) + ",\"pressure_BMP280\":" +  String(read_BMP280Buffer.Data2()) + "}";
+    // String data = "{\"temp_BMP280\":" + String(read_BMP280Buffer.Data1()) + ", \"temp_HTS221\":" + String(read_HTS221Buffer.Data1()) + ",\"humid_HTS221\":" + String(read_HTS221Buffer.Data2()) + ",\"pressure_BMP280\":" +  String(read_BMP280Buffer.Data2()) + "}";
 
-    Serial.println(data);
-    data.toCharArray(msg, (data.length() + 1));
-    mqtt_client.publish("@msg/data", msg); 
-    // Convert the float value to a String
-    // String tempData = String(read_BMP280Buffer.Data1());
+    // Serial.println(data);
+    // data.toCharArray(msg, (data.length() + 1));
+    // mqtt_client.publish("@msg/data", msg); 
+    // Serial.print("check message = ");
+    // Serial.println(msg);
+    // Create a StaticJsonDocument with a sufficient capacity for your JSON data
+        StaticJsonDocument<256> doc;
+        
+        // Add the sensor data to the JSON document
+        doc["temp_BMP280"] = read_BMP280Buffer.Data1();
+        doc["temp_HTS221"] = read_HTS221Buffer.Data1();
+        doc["humid_HTS221"] = read_HTS221Buffer.Data2();
+        doc["pressure_BMP280"] = read_BMP280Buffer.Data2();
 
-    // Convert the String to a const char*
-    // const char* tempDataChar = tempData.c_str();
+        // Serialize the JSON document to a string
+        char jsonStr[256];
+        size_t jsonStrSize = serializeJson(doc, jsonStr, sizeof(jsonStr));
 
-    // Publish the data
-    // mqtt_client.publish("@msg/temp", tempDataChar);
+        // Publish the JSON string to the MQTT topic
+        mqtt_client.publish(mqtt_topic, jsonStr);
+
+        // Print the JSON data to the Serial console for debugging
+        lock->lockSerial();
+        Serial.println(jsonStr);
+        lock->unlockSerial();
+
+        // Delay for 60 seconds before the next iteration
+        vTaskDelay(60000L);
+    }
 
     vTaskDelay(60000L);
     }
     
-  }

@@ -68,7 +68,7 @@ def post_to_predict(data):
 # Function to write data to InfluxDB
 def write_to_influxdb(data):
     # format data
-    point = Point("sensor_data")\
+    point = Point("g8_sensor_data")\
         .field("temp_BMP280", data["temp_BMP280"])\
         .field("temp_HTS221", data["temp_HTS221"])\
         .field("humid_HTS221", data["humid_HTS221"])\
