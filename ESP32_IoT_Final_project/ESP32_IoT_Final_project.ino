@@ -128,15 +128,18 @@ void setup() {
       (void *)lock,                              // pass lock as a parameter
       1,                                         // Priority
       NULL);
-    xTaskCreate(
-      Reconnect_MQTT, "Task Reconnect MQTT", 2048,  // Stack size
-      (void *)lock,                              // pass lock as a parameter
-      3,                                         // Priority
-      NULL);
+    // xTaskCreate(
+    //   Reconnect_MQTT, "Task Reconnect MQTT", 2048,  // Stack size
+    //   (void *)lock,                              // pass lock as a parameter
+    //   3,                                         // Priority
+    //   NULL);
 }
 
 void loop() {
-
+  if (!mqtt_client.connected()) {
+        connectToMQTT();
+    }
+    mqtt_client.loop();
 }
     
 
@@ -346,14 +349,4 @@ void TaskSendData(void *pvParameters) {
         vTaskDelay(5000L);
     }
     }
-    
-void Reconnect_MQTT(void *pvParameters){
-for(;;)
-  {
-  if (!mqtt_client.connected()) {
-        connectToMQTT();
-    }
-    mqtt_client.loop();
-}
-  vTaskDelay(1000); // one tick delay (1s) in between reads for stability 
-  }
+  
