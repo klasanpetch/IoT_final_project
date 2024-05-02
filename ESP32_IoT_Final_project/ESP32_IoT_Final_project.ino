@@ -154,7 +154,7 @@ void connectToWiFi() {
 
 void connectToMQTT() {
     while (!mqtt_client.connected()) {
-        String client_id = "esp32-client";
+        String client_id = "esp32-client-";
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
