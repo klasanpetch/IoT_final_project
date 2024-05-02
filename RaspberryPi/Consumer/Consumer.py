@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import WriteOptions
 import paho.mqtt.client as mqtt
+from paho.mqtt.client import CallbackAPIVersion
 import json
 import requests
 
@@ -27,7 +28,7 @@ MQTT_PUBLISH_TOPIC = "@msg/data"
 MQTT_CLIENT_ID = os.environ.get('MQTT_CLIENT_ID')
 
 # Initialize the MQTT Client with the required callback_api_version
-mqtt_client = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=mqtt.MQTTv311)
+mqtt_client = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=mqtt.MQTTv311, callback_api_version=CallbackAPIVersion.VERSION2)
 
 # Authenticate MQTT Client
 mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
