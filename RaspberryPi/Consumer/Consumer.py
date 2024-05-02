@@ -12,10 +12,8 @@ from influxdb_client.client.write_api import ASYNCHRONOUS
 import paho.mqtt.client as mqtt
 import json
 import requests
-print("before load env")
 # Load environment variables from ".env"
 load_dotenv()
-print("after load env")
 # InfluxDB config
 BUCKET = os.environ.get('INFLUXDB_BUCKET')
 print("connecting to",os.environ.get('INFLUXDB_URL'))

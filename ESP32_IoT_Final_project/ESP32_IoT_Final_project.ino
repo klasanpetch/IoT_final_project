@@ -126,7 +126,7 @@ void setup() {
     xTaskCreate(
       TaskSendData, "Task Send Data", 2048,  // Stack size
       (void *)lock,                              // pass lock as a parameter
-      2,                                         // Priority
+      1,                                         // Priority
       NULL);
     xTaskCreate(
       Reconnect_MQTT, "Task Reconnect MQTT", 2048,  // Stack size
@@ -136,6 +136,8 @@ void setup() {
 }
 
 void loop() {
+
+}
     
 
 void connectToWiFi() {
@@ -364,7 +366,7 @@ void TaskSendData(void *pvParameters) {
     }
     }
     
-void Reconnect_MQTT(void *pvParameters)
+void Reconnect_MQTT(void *pvParameters){
 for(;;)
   {
   if (!mqtt_client.connected()) {
