@@ -16,8 +16,10 @@ from influxdb_client.client.write_api import ASYNCHRONOUS
 import json
 
 # Load the trained model
-knn_model = joblib.load('knn_model.pkl')
-model_columns = joblib.load("knn_model_columns.pkl")
+#joblib.load(filename, mmap_mode=None)
+#Reconstruct a Python object from a file persisted with joblib.dump.
+svm_model = joblib.load('svm_model.pkl')
+svm_columns = joblib.load("svm_model_columns.pkl")
 
 # Load environment variables from ".env"
 load_dotenv()
@@ -35,10 +37,13 @@ write_api = client.write_api()
 # Create simple REST API server
 app = Flask(__name__)
 
+# Create a list to store the last five temperature readings
+recent_temperatures = []
+
 # Default route: check if model is available.
 @app.route('/')
 def check_model():
-    if knn_model:
+    if svm_model:
         return "Model is ready for prediction"
     return "Server is running but something wrongs with the model"
 
@@ -46,26 +51,48 @@ def check_model():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get JSON text from the request
+        # Parse the JSON data from the request
         json_text = request.data
-        # Convert JSON text to JSON object
         json_data = json.loads(json_text)
-        # Add to dataframe
-        query = pd.DataFrame([json_data])
-        # Extract features and label from data
-        feature_sample = query[model_columns]
-        target_sample = query['Room_Occupancy_Count'][0]
-        # Predict the number of people inside the room
-        predict_sample = knn_model.predict(feature_sample)
-        print("Actual Room Occupancy Count", int(target_sample),"\tPredicted output:", int(predict_sample[0]))
-        # Assign the true label and predicted label into Point
-        point = Point("predict_value")\
-            .field("Actual_Occupancy_Count", target_sample)\
-            .field("Predicted_Occupancy_Count", predict_sample[0])
+
+        # Check if the data contains the expected key 'temp_BMP280'
+        if 'temp_BMP280' not in json_data:
+            return "Invalid input: 'temp_BMP280' key not found in input data.", 400
         
-        # Write that Point into database
+        # Extract the temperature value
+        temp = json_data['temp_BMP280']
+
+        # Append the temperature reading to the list of recent temperatures
+        recent_temperatures.append(temp)
+        
+        # Maintain the list at a length of exactly five readings
+        if len(recent_temperatures) > 5:
+            recent_temperatures.pop(0)
+        
+        # Check if we have enough readings to make a prediction
+        if len(recent_temperatures) < 5:
+            return "Insufficient data: Waiting for five temperature readings before predicting.", 200
+        
+        # Create a DataFrame from the recent temperatures
+        query = pd.DataFrame([recent_temperatures], columns=svm_columns)
+        
+        # Make the prediction using the SVM model
+        predict_sample = svm_model.predict(query)
+        
+        # Convert the predicted value to float
+        predicted_output = float(predict_sample[0])
+        
+        # Log the predicted output
+        print(f"Predicted output: {predicted_output}")
+
+        # Create a Point with the predicted temperature and write it to InfluxDB
+        point = Point("predicted_temperature")\
+            .field("next_temperature", predicted_output)
+
         write_api.write(BUCKET, os.environ.get('INFLUXDB_ORG'), point)
-        return jsonify({"Actual Room Occupancy Count": int(target_sample), "Predicted output": int(predict_sample[0])}), 200
+
+        # Return the predicted output as JSON response
+        return jsonify({"Predicted output": predicted_output}), 200
     
     except:
         # Something error with data or model

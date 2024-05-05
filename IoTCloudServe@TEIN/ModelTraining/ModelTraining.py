@@ -7,52 +7,44 @@ Ref: https://www.kaggle.com/code/vivekaryan/room-occupancy-estimation-with-varia
 
 # Importing relevant modules
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.svm import SVR
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import numpy as np
 import joblib
 
-# put data in dataframe
-df = pd.read_csv('train_set.csv')
-df.drop(columns=['Date','Time'],axis=1, inplace=True)
+df=pd.read_csv('data_temp.csv')
 
-# split into features (X) and target (y)
-X = df.drop(['Room_Occupancy_Count'], axis=1)
-y = df[['Room_Occupancy_Count']]
+# Prepare the data
+X = []
+y = []
+for i in range(5, len(df)):
+    X.append(df['temp'].iloc[i-5:i].values)
+    y.append(df['temp'].iloc[i])
+X = np.array(X)
+y = np.array(y)
 
-# After analysis, we will use ['S1_Temp', 'S1_Light', 'S3_Light', 'S1_Sound', 'S5_CO2_Slope'] as features
-corr_features = ['S1_Temp', 'S1_Light', 'S3_Light', 'S1_Sound', 'S5_CO2_Slope']
-X_final = X[corr_features]
+# Split the data into train and test sets with an 80:20 ratio
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Split into train data and validation data
-X_train, X_test, y_train, y_test = train_test_split(X_final, y, test_size=0.25, random_state=42)
+# Train the Support Vector Machine (SVM) regression model
+svm_model = SVR(kernel='linear')
+svm_model.fit(X_train, y_train)
 
-# Use the pre-tuned hyperparameters
-knn_model = KNeighborsClassifier(n_neighbors= 3, p= 1, weights="distance")
+# Make predictions on the test set
+y_pred = svm_model.predict(X_test)
 
-# Train KNN model with train data
-knn_model.fit(X_train, y_train)
+# Calculate Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE)
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 
-# Validate the model performance on validation set
-print("Accuracy on test set: ", knn_model.score(X_test, y_test))
-y_pred = knn_model.predict(X_test)
+print("Mean Absolute Error (MAE):", mae)
+print("Root Mean Squared Error (RMSE):", rmse)
 
-# Visualizing the confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-plt.figure(figsize = (6,4))
-sns.heatmap(cm, annot=True, cmap="Spectral",fmt='g')
-plt.xlabel('Predicted', fontsize=10)
-plt.ylabel('Actual/Observed', fontsize=10)
-plt.show()
-
-print("================ Accuracy Report ================")
-print(classification_report(y_test, y_pred))
 
 # Export the trained model for use in online prediction. 
-knn_model_columns = list(X_train)
-print(knn_model_columns)
-joblib.dump(knn_model_columns, 'knn_model_columns.pkl')
-joblib.dump(knn_model, 'knn_model.pkl')
+svm_model_columns = list(X_train)
+print(svm_model_columns)
+joblib.dump(svm_model_columns, 'svm_model_columns.pkl')
+joblib.dump(svm_model, 'svm_model.pkl')
 print('Model dumped')
