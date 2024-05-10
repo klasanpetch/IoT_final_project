@@ -22,7 +22,7 @@ const char *mqtt_topic = "@msg/data";
 const char* mqtt_username = "sanpetch";
 const char* mqtt_password = "siriwuthinon";
 const int mqtt_port = 1883;
-
+const char *mqtt_topic_predict = "@msg/predict";
 char msg[100];
 
 WiFiClient espClient;
@@ -160,6 +160,7 @@ void connectToMQTT() {
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
             mqtt_client.subscribe(mqtt_topic);
+            mqtt_client.subscribe(mqtt_topic_predict);
         } else {
             Serial.print("Failed, rc=");
             Serial.print(mqtt_client.state());
@@ -173,8 +174,39 @@ void mqttCallback(char *mqtt_topic, byte *payload, unsigned int length) {
     Serial.print("Message received on mqtt_topic: ");
     Serial.println(mqtt_topic);
     Serial.print("Message: ");
-    for (unsigned int i = 0; i < length; i++) {
-        Serial.print((char) payload[i]);
+    if (String(mqtt_topic) == "@msg/predict") {
+        Serial.println("Message from @msg/predict:");
+        // Convert the payload to a string
+        String message = "";
+        for (unsigned int i = 0; i < length; i++) {
+            message += (char)payload[i];
+        }
+        Serial.println("Received JSON data: ");
+        Serial.println(message);
+    // Add your logic here to process the received JSON data
+        // For example, you can parse the JSON using ArduinoJson library
+        StaticJsonDocument<200> doc;
+        DeserializationError error = deserializeJson(doc, message);
+        
+        if (error) {
+            Serial.print("JSON Deserialization failed: ");
+            Serial.println(error.c_str());
+            return;
+        }
+
+        // Extract data from the JSON document
+        float predicted_temperature = doc["predicted_temperature"];
+        String timestamp = doc["timestamp"];
+        
+        // Process the data as needed
+        Serial.print("Predicted temperature: ");
+        Serial.println(predicted_temperature);
+        Serial.print("Timestamp: ");
+        Serial.println(timestamp);
+
+        // Add your custom logic here to process the received data
+    } else if (String(mqtt_topic) == "@msg/data") {
+        // Handle messages from other topics as needed
     }
     Serial.println("\n-----------------------");
 }

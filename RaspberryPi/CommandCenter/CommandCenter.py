@@ -29,15 +29,16 @@ query_api = client.query_api()
 
 # MQTT broker config
 MQTT_BROKER_URL = os.environ.get('MQTT_URL')
-MQTT_PUBLISH_TOPIC = "@msg/data"
+MQTT_PUBLISH_TOPIC = "@msg/predict"
 print("connecting to MQTT Broker", MQTT_BROKER_URL)
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqttc.connect(MQTT_BROKER_URL,1883)
 
+
 def poll_and_publish():
     try:
         query = 'from(bucket:"kla")\
-            |> range(start: range(-10m))\
+            |> range(start: -10m)\
             |> filter(fn: (r) => r._measurement == "predicted_temperature")\
             |> filter(fn: (r) => r._field == "next_temperature")'
         tables = query_api.query(query)
@@ -60,9 +61,6 @@ def poll_and_publish():
     except Exception as e:
         # Handle any exceptions that might occur
         print(f"An error occurred: {e}")
-
-# Start the MQTT loop forever
-mqttc.loop_forever()
 
 try:
     while True:
