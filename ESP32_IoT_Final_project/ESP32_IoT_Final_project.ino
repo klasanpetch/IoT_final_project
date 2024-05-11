@@ -4,6 +4,7 @@
 
 #include <Wire.h>
 #include <SPI.h>
+#include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_HTS221.h>    //IIC humidity sensor
@@ -11,7 +12,8 @@
 #include <ArduinoJson.h>
 #define SDA_PIN 41
 #define SCL_PIN 40
-
+#define PIN        18 
+Adafruit_NeoPixel pixels(1, PIN, NEO_GRB + NEO_KHZ800);
 // Wifi Credentials
 const char* ssid     = "Maxone1 2G";
 const char* password = "0891117564";
@@ -108,6 +110,8 @@ void setup() {
     Wire.begin(SDA_PIN, SCL_PIN);
     connectToWiFi();
     mqtt_client.setServer(mqtt_broker, mqtt_port);
+    pixels.setBrightness(10);
+    pixels.begin(); // INITIALIZE NeoPixel (REQUIRED)
     // mqtt_client.setKeepAlive(60);
     mqtt_client.setCallback(mqttCallback); // Corrected callback function name
     connectToMQTT();
@@ -196,19 +200,27 @@ void mqttCallback(char *mqtt_topic, byte *payload, unsigned int length) {
 
         // Extract data from the JSON document
         float predicted_temperature = doc["predicted_temperature"];
-        String timestamp = doc["timestamp"];
+        // String timestamp = doc["timestamp"];
         
         // Process the data as needed
         Serial.print("Predicted temperature: ");
         Serial.println(predicted_temperature);
-        Serial.print("Timestamp: ");
-        Serial.println(timestamp);
-
+        // Serial.print("Timestamp: ");
+        // Serial.println(timestamp);
+      if(predicted_temperature > 34){
+      pixels.setPixelColor(0, Adafruit_NeoPixel::Color((byte)(255), 0, 0));
+       }
+      else{
+      pixels.setPixelColor(0, Adafruit_NeoPixel::Color(0, 0, (byte)(255)));
+      }
+    // Send the updated pixel colors to the hardware.
+    pixels.show();  
         // Add your custom logic here to process the received data
     } else if (String(mqtt_topic) == "@msg/data") {
         // Handle messages from other topics as needed
     }
     Serial.println("\n-----------------------");
+     
 }
 
 void TaskBMP280(void *pvParameters) {

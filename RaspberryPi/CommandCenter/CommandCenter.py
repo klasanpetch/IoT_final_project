@@ -42,16 +42,17 @@ def poll_and_publish():
             |> filter(fn: (r) => r._measurement == "predicted_temperature")\
             |> filter(fn: (r) => r._field == "next_temperature")'
         tables = query_api.query(query)
+        print("tables is :"+ str(tables))
         # Process query results
         for table in tables:
             for record in table.records:
                 # Extract predicted temperature and timestamp
                 predicted_temperature = record.get_value()
-                timestamp = record.get_time()
+                # timestamp = record.get_time()
                 
                 # Create a JSON object to publish
                 data_to_publish = {
-                    'timestamp': str(timestamp),
+                    # 'timestamp': str(timestamp),
                     'predicted_temperature': predicted_temperature
                 }
                 

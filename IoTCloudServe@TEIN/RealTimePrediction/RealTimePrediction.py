@@ -61,10 +61,10 @@ def predict():
         
         # Extract the temperature value
         temp = json_data['temp_BMP280']
-
+        print("temp = ", temp)
         # Append the temperature reading to the list of recent temperatures
         recent_temperatures.append(temp)
-        
+        print("recent_temperature = ",recent_temperatures)
         # Maintain the list at a length of exactly five readings
         if len(recent_temperatures) > 5:
             recent_temperatures.pop(0)
@@ -87,8 +87,8 @@ def predict():
 
         # Create a Point with the predicted temperature and write it to InfluxDB
         point = Point("predicted_temperature")\
-            .field("next_temperature", predicted_output)
-
+            .field("next_temperature", predicted_output)\
+            .field("Error", abs((predicted_output-float(temp))*100/float(temp)))
         write_api.write(BUCKET, os.environ.get('INFLUXDB_ORG'), point)
 
         # Return the predicted output as JSON response

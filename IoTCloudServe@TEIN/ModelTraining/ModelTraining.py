@@ -1,5 +1,5 @@
 """
-KNN Model Training
+SVM Model Training
 for offline training the model to predict the number of people 
 inside the room (0-3 people) using ambient room sensors. 
 Ref: https://www.kaggle.com/code/vivekaryan/room-occupancy-estimation-with-variable-selection 
@@ -9,6 +9,7 @@ Ref: https://www.kaggle.com/code/vivekaryan/room-occupancy-estimation-with-varia
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR
+from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 import joblib
@@ -37,10 +38,10 @@ y_pred = svm_model.predict(X_test)
 # Calculate Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE)
 mae = mean_absolute_error(y_test, y_pred)
 rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-
+r_squared = r2_score(y_test, y_pred)
 print("Mean Absolute Error (MAE):", mae)
 print("Root Mean Squared Error (RMSE):", rmse)
-
+print("R-squared:", r_squared)
 
 # Export the trained model for use in online prediction. 
 svm_model_columns = list(X_train)
